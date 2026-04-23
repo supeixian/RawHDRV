@@ -1,0 +1,57 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Experiment outputs / checkpoints
+checkpoints/
+results/
+outputs/
+runs/
+wandb/
+
+# Large model files
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.h5
+*.pkl
+*.npz
+
+# Local datasets and generated data
+datasets/
+data/cache/
+data/tmp/
+
+# Keep folder but ignore weight files
+weight_checkpoints/*
+!weight_checkpoints/*.txt
