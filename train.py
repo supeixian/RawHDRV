@@ -221,7 +221,7 @@ def validate(epoch, current_iter):
     total_loss = 0.0
     
     with torch.no_grad():
-        for idx, samples in enumerate(tqdm(valid_loader, desc='验证中')):
+        for idx, samples in enumerate(tqdm(valid_loader, desc='Validating')):
             LRs_RAW = samples['LDRs_RAW'].to(device, non_blocking=True)
             HR_HDR = samples['HDR_DATA'].to(device, non_blocking=True)
             wb = samples['wb'].to(device, non_blocking=True)

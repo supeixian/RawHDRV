@@ -32,19 +32,19 @@ pip install -r requirements.txt
 
 Prepare dataset directories under `./datasets/` following the paths configured in `config.py`, e.g.:
 
-- `./datasets/Train/1X/`
-- `./datasets/Test/1X/`
+- `./datasets/Train/`
+- `./datasets/Test/`
 
 ## Training
 
 ```bash
-python train.py --model RRVSR_HDR --gpu_id 0
+python train.py --model RawHDRV --gpu_id 0
 ```
 
 ## Testing
 
 ```bash
-python test.py --model RRVSR_HDR --gpu_id 0 --save_image True
+python test.py --model RawHDRV --gpu_id 0 --save_image True
 ```
 
 ## Citation
