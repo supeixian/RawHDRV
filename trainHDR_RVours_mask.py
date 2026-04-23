@@ -27,13 +27,10 @@ from models.RawHDRV import RawHDRV
 from data.dataset import HDRVideoDataset
 from tqdm import tqdm
 from data.process import process
-# import pytorch_msssim
 from tensorboardX import SummaryWriter
-# from models.spatial_color_alignment import color_correction
 from utils import get_psnr, get_ssim
 import cv2
 import numpy as np
-# from perceptual_loss_module import SimplePerceptualLoss, HDRTemporalLossRGBG 
 
 # 检查点配置
 checkpoint_dir = os.path.join(opt.weight_savepath, opt.model)
@@ -127,10 +124,7 @@ class SimpleOverexposureColorLoss(nn.Module):
         self.overexposure_weight = overexposure_weight
         
     def forward(self, pred_hdr, target_hdr, mask_over=None):
-        # 1. 全局L1颜色损失
-        # global_loss = torch.mean(torch.abs(pred_hdr - target_hdr))
-        
-        # 2. 过曝区域加权损失（如果提供mask）
+        # 过曝区域加权损失（如果提供mask）
         overexposure_loss = 0
         if mask_over is not None:
             if mask_over.shape[1] == 1:
@@ -265,31 +259,14 @@ def train(epoch):
         #     LRs_RAW, HR_HDR = augment_rgbg_data_torch(LRs_RAW, HR_HDR)
         # LR_RGB = samples['LDR_DATA'].to(device, non_blocking=True)
         # print(f"HR_HDR shape: {HR_HDR.shape}")
-        B, T, C, H, W = LRs_RAW.shape
-
-        # mid_frame = LRs_RAW[:, T//2]  # 中间帧
-        # max_channel = torch.max(mid_frame, dim=1)[0]
-        # min_channel = torch.min(mid_frame, dim=1)[0]
-        # target_mask_o = torch.zeros_like(max_channel)
-        # target_mask_o[max_channel>0.6] = 1
-        # target_mask_u = torch.zeros_like(min_channel)
-        # target_mask_u[min_channel<0.001] = 1
-        # target_mask_o = target_mask_o.unsqueeze(1)  # -> [B,1,H,W]
-        # target_mask_u = target_mask_u.unsqueeze(1)  # -> [B,1,H,W]
 
         # 前向传播
         pred_HDR, under_mask, over_mask = model(LRs_RAW, wb, cam2rgb)
         LRs_RAW = LRs_RAW[:, LRs_RAW.shape[1] // 2]  # 变为 (B, 1, C, H, W)
         
-        # loss_over = loss_mask(over_mask, target_mask_o)
-        # loss_under = loss_mask(under_mask, target_mask_u)
         log_loss = loss_logl2(pred_HDR, HR_HDR)
         l1_loss = loss_l1(pred_HDR, HR_HDR)
-        # l1_lossulaw = loss_l1ulaw(pred_HDR, HR_HDR)
         overexp_color_loss = simple_overexp_loss(pred_HDR, HR_HDR, over_mask)
-        # loss = l1_loss
-        # loss = l1_lossulaw
-        # loss = log_loss + l1_loss
         loss = log_loss + l1_loss + overexp_color_loss
 
 
@@ -381,33 +358,12 @@ def validate(epoch, current_iter):
         # for samples in tqdm(valid_loader, desc='验证中'):
         for idx, samples in enumerate(tqdm(valid_loader, desc='验证中')):
             LRs_RAW = samples['LDRs_RAW'].to(device, non_blocking=True)
-            # LRs_RAW_nopack = samples['LDRs_unpacked'].to(device, non_blocking=True)
             HR_HDR = samples['HDR_DATA'].to(device, non_blocking=True)
             wb = samples['wb'].to(device, non_blocking=True)
             cam2rgb = samples['cam2rgb'].to(device, non_blocking=True)
 
-            # print(f"[DEBUG] HR_HDR范围: {HR_HDR.min():.2f}-{HR_HDR.max():.2f}")
-            # print(f'HR_HDR shape: {HR_HDR.shape}')  # 新增形状打印
-            # print(f'LR_RGB shape: {LR_RGB.shape}')  # 新增形状打印
-
-            # pred_HDR = model(LRs_RAW_nopack, LRs_RAW)
             pred_HDR, under_mask, over_mask = model(LRs_RAW, wb, cam2rgb)
 
-            # LRs_RAW = LRs_RAW[:, LRs_RAW.shape[1] // 2]  # 变为 (B, 1, C, H, W)
-            
-            # 获取中间帧
-            B, T, C, H, W = LRs_RAW.shape
-            mid_frame = LRs_RAW[:, T//2]
-            
-            # 生成目标掩码
-            # max_channel = torch.max(LRs_RAW, dim=2)[0]
-            # min_channel = torch.min(LRs_RAW, dim=2)[0]
-            # target_mask_o = torch.zeros_like(max_channel)
-            # target_mask_o[max_channel>0.6] = 1
-            # target_mask_u = torch.zeros_like(min_channel)
-            # target_mask_u[min_channel<0.001] = 1
-
-            
             LRs_RAW = LRs_RAW[:, LRs_RAW.shape[1] // 2].unsqueeze(1)  # 变为 (B, 1, C, H, W)
             if HR_HDR.dim() == 5:
                 # 合并batch和sequence维度 [B,T,C,H,W] -> [B*T,C,H,W]
@@ -415,16 +371,10 @@ def validate(epoch, current_iter):
             if LRs_RAW.dim() == 5:
                 # 合并batch和sequence维度 [B,T,C,H,W] -> [B*T,C,H,W]
                 LRs_RAW = LRs_RAW.view(-1, LRs_RAW.size(2), LRs_RAW.size(3), LRs_RAW.size(4))
-            # print(f'HR_HDR shape: {HR_HDR.shape}')
-            # print(f'LRs_RAW shape: {LRs_RAW.shape}')
 
             log_loss = loss_logl2(pred_HDR, HR_HDR)
             l1_loss = loss_l1(pred_HDR, HR_HDR)
-            # l1_lossulaw = loss_l1ulaw(pred_HDR, HR_HDR)
             overexp_color_loss = simple_overexp_loss(pred_HDR, HR_HDR, over_mask)
-            # loss = l1_loss
-            # loss = l1_lossulaw
-            # loss = log_loss + l1_loss
             loss = log_loss + l1_loss + overexp_color_loss
 
             total_loss += loss.item()
@@ -437,13 +387,9 @@ def validate(epoch, current_iter):
                 # 保存掩码可视化
                 mask_u_vis = (under_mask[0, 0].cpu().numpy() * 255).astype(np.uint8)
                 mask_o_vis = (over_mask[0, 0].cpu().numpy() * 255).astype(np.uint8)
-                # target_u_vis = (under_target_mask[0, 0].cpu().numpy() * 255).astype(np.uint8)
-                # target_o_vis = (over_target_mask[0, 0].cpu().numpy() * 255).astype(np.uint8)
                 
                 cv2.imwrite(f'{save_path}sample{idx}_mask_u_pred.png', mask_u_vis)
                 cv2.imwrite(f'{save_path}sample{idx}_mask_o_pred.png', mask_o_vis)
-                # cv2.imwrite(f'{save_path}sample{idx}_mask_u_target.png', target_u_vis)
-                # cv2.imwrite(f'{save_path}sample{idx}_mask_o_target.png', target_o_vis)
 
                 out_hdr = process(pred_HDR.cpu().detach(), wbs=wb[None].cpu(), cam2rgbs=cam2rgb[None].cpu(), gamma=2.2, use_demosaic=False, use_tonemapping=True, data_range=8.0)[0].numpy().transpose((1,2,0))
                 gt_hdr = process(HR_HDR.cpu().detach(), wbs=wb[None].cpu(), cam2rgbs=cam2rgb[None].cpu(), gamma=2.2, use_demosaic=False, use_tonemapping=True, data_range=8.0)[0].numpy().transpose((1,2,0))
@@ -459,11 +405,6 @@ def validate(epoch, current_iter):
 
             
             total_loss += loss.item()
-
-            # gt_range = HR_HDR.max() - HR_HDR.min()
-            # # print(f'真值动态范围: {gt_range.item():.3f} (理论应接近1.0)')
-            # if gt_range > 2.0:
-            #     print("警告：HDR真值动态范围异常，请检查数据预处理！")
 
             gt_log, pred_log = preprocess_for_log_metrics(HR_HDR, pred_HDR)
 
@@ -485,19 +426,11 @@ def validate(epoch, current_iter):
     model.train()  # 重新设置为训练模式
     return avg_psnr, avg_ssim, avg_loss
 
-# 开始训练循环
-# for epoch in range(start_epoch, opt.number_epochs + 1):
-#     train(epoch)
-#     scheduler.step()
-
 
 writer.close()
 
 # 在文件底部修改主入口
 if __name__ == '__main__':
-    # import torch.multiprocessing as mp
-    # mp.set_start_method('spawn', force=True)  # 确保在main中设置
-
     # 确保所有初始化操作在main中完成
     for epoch in range(start_epoch, opt.number_epochs + 1):
         train(epoch)

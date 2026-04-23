@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import glob
-from rawhdr.process import unpack_raw_bayer, read_raw
+from process import read_raw
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
@@ -221,15 +221,11 @@ class HDRVideoDataset(Dataset):
             ldr_sequence = ldr_sequence[:, :, y:y+crop_size, x:x+crop_size]
             hdr = hdr[:, y:y+crop_size, x:x+crop_size] if hdr is not None else None
         
-        # 解包LDR数据
-        ldr_unpacked = unpack_raw_bayer(ldr_sequence, metadata_list[center_idx][1])
-        
         # 获取中心帧元数据
         wb, pattern, cam2rgb = metadata_list[center_idx]
         
         return {
             'LDRs_RAW': torch.FloatTensor(ldr_sequence),
-            'LDRs_unpacked': torch.FloatTensor(ldr_unpacked),
             'HDR_DATA': torch.FloatTensor(hdr) if hdr is not None else None,
             'wb': torch.FloatTensor(wb),
             'cam2rgb': torch.FloatTensor(cam2rgb),

@@ -339,7 +339,6 @@ for test_data in tqdm(test_dataloader):
         # 加载HDR测试数据
         LRs_RAW = test_data['LDRs_RAW'].cuda()
         LRs_RAW_stack = LRs_RAW.clone() 
-        # LRs_RAW_nopack = test_data['LDRs_unpacked'].cuda()
         HR_HDR_gt = test_data['HDR_DATA'].cuda()
         wb = test_data['wb'].to(device, non_blocking=True)
         cam2rgb = test_data['cam2rgb'].to(device, non_blocking=True)
