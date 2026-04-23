@@ -8,7 +8,6 @@ from config import get_test_config
 parser = argparse.ArgumentParser(description='HDR Video Testing')
 parser.add_argument('--model', type=str, default='RRVSR_HDR', help='模型名称')
 parser.add_argument('--gpu_id', type=str, default='0', help='GPU ID')
-parser.add_argument('--scale', type=int, default=1, help='HDR固定缩放比例')
 parser.add_argument('--save_image', type=bool, default=False, help='是否保存HDR结果')
 parser.add_argument('--save_flows', action='store_true', help='是否保存光流可视化')
 # parser.add_argument('--crop_coords', type=int, nargs=2, default=[800, 600], 

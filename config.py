@@ -9,7 +9,7 @@ def get_train_config(args):
 
     model = args.model
     gpu_id = args.gpu_id
-    scale = args.scale
+    scale = 1
     continue_train = args.continue_train
 
     opt_parser = argparse.ArgumentParser(description='Training module')
@@ -29,7 +29,6 @@ def get_train_config(args):
                           help='启用内存缓存加速数据加载')
     opt_parser.add_argument('--memcache_size', type=int, default=200,
                           help='内存缓存的最大样本数（需小于系统内存容量）')
-    opt_parser.add_argument('--scale', type=int, default=args.scale)
     opt_parser.add_argument('--enable_dynamic_levels', type=bool, default=True,help='启用自动电平检测')
     opt_parser.add_argument('--train_root', type=str, default='./datasets/Train/')
     opt_parser.add_argument('--test_root', type=str, default='./datasets/Test/')
@@ -51,7 +50,7 @@ def get_train_config(args):
 def get_test_config(args):
     model = args.model
     gpu_id = args.gpu_id
-    scale = args.scale
+    scale = 1
     save_image = args.save_image
 
 
@@ -60,7 +59,6 @@ def get_test_config(args):
     opt_parser.add_argument('--N_frames', type=int, default=5)
     opt_parser.add_argument('--batch_size', type=int, default=1)
     opt_parser.add_argument('--n_workers', type=int, default=4)
-    opt_parser.add_argument('--scale', type=int, default=args.scale)
 
     opt_parser.add_argument('--test_paths_LR_RAW', type=str, default='./datasets/Test/{0:d}X/lr_{1:d}_raw/'.format(scale, scale))
     opt_parser.add_argument('--test_paths_LR_RGB', type=str, default='./datasets/Test/{0:d}X/lr_{1:d}_rgb/'.format(scale, scale))

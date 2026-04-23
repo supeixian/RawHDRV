@@ -5,9 +5,8 @@ from config import get_train_config
 
 # 初始化配置
 parser = argparse.ArgumentParser(description='HDR Video Training')
-parser.add_argument('--model', type=str, default='RRVSR_HDR', help='模型名称')
+parser.add_argument('--model', type=str, default='RawHDRV', help='模型名称')
 parser.add_argument('--gpu_id', type=str, default='0', help='GPU ID')
-parser.add_argument('--scale', type=int, default=1, help='HDR固定缩放比例')
 parser.add_argument('--continue_train', action='store_true', help='是否从检查点恢复训练')
 args = parser.parse_args()
 opt = get_train_config(args)
@@ -205,7 +204,7 @@ valid_loader = DataLoader(valid_dataset,
 print(f"训练集样本总数: {len(train_dataset)}")
 print(f"验证集样本总数: {len(valid_dataset)}")
 # 日志记录
-writer = SummaryWriter(f'./logs/hdr_train/{opt.model}_scale{opt.scale}')
+writer = SummaryWriter(f'./logs/hdr_train/{opt.model}')
 
 def augment_rgbg_data_torch(ldr_data, hdr_data):
     """
