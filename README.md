@@ -2,7 +2,7 @@
 
 Official implementation for the paper:
 
-**RawHDRV: HDR Video Reconstruction from Single-Exposure Raw Sequences**
+**High Dynamic Range Video Reconstruction from Single-Exposure Raw Sequences**
 
 ## Overview
 
