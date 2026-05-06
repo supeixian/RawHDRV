@@ -57,7 +57,7 @@ If this repository is useful for your research, please cite:
 
 ```bibtex
 @article{rawhdrv,
-	title={RawHDRV: HDR Video Reconstruction from Single-Exposure Raw Sequences}
+	title={High Dynamic Range Video Reconstruction from Single-Exposure Raw Sequences}
 }
 ```
 
